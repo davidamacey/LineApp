@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#33000000">
+
+    <!-- Each line consists of a view for the line itself, a TextView for the label, and a handle for adjustment -->
+    <!-- Line 1 -->
+    <View
+        android:id="@+id/line1"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="50dp"
+        android:background="#FF0000" />
+    
+    <TextView
+        android:id="@+id/line1_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line1"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_1"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line1_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line1"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 2 -->
+    <View
+        android:id="@+id/line2"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="100dp"
+        android:background="#00FF00" />
+    
+    <TextView
+        android:id="@+id/line2_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line2"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_2"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line2_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line2"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 3 -->
+    <View
+        android:id="@+id/line3"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="150dp"
+        android:background="#0000FF" />
+    
+    <TextView
+        android:id="@+id/line3_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line3"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_3"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line3_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line3"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 4 -->
+    <View
+        android:id="@+id/line4"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="200dp"
+        android:background="#FFFF00" />
+    
+    <TextView
+        android:id="@+id/line4_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line4"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_4"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line4_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line4"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 5 -->
+    <View
+        android:id="@+id/line5"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="250dp"
+        android:background="#FF00FF" />
+    
+    <TextView
+        android:id="@+id/line5_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line5"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_5"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line5_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line5"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 6 -->
+    <View
+        android:id="@+id/line6"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="300dp"
+        android:background="#00FFFF" />
+    
+    <TextView
+        android:id="@+id/line6_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line6"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_6"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line6_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line6"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Line 7 -->
+    <View
+        android:id="@+id/line7"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="350dp"
+        android:background="#FFFFFF" />
+    
+    <TextView
+        android:id="@+id/line7_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@id/line7"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-15dp"
+        android:text="@string/line_7"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold" />
+    
+    <View
+        android:id="@+id/line7_handle"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@id/line7"
+        android:layout_marginTop="-15dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/circle_handle" />
+
+    <!-- Close button to exit the overlay -->
+    <Button
+        android:id="@+id/closeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:text="Close"
+        android:alpha="0.7" />
+</RelativeLayout>

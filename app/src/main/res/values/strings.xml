@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ruler App</string>
+    <string name="start_service">Start Ruler</string>
+    <string name="stop_service">Stop Ruler</string>
+    <string name="overlay_permission_required">Permission to display over other apps is required</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="line_1">Line 1</string>
+    <string name="line_2">Line 2</string>
+    <string name="line_3">Line 3</string>
+    <string name="line_4">Line 4</string>
+    <string name="line_5">Line 5</string>
+    <string name="line_6">Line 6</string>
+    <string name="line_7">Line 7</string>
+</resources>
