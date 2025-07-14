@@ -119,9 +119,9 @@ To install the app directly on an Android device without using Android Studio:
 - Switch between apps normally - the ruler stays in place
 - Perfect for comparing measurements across different apps
 
-#### Closing the Ruler
+#### Closing the Lines
 - Tap the × button in the bottom-right corner (visible in any orientation)
-- Or return to the Ruler app and tap "Stop Ruler"
+- Or return to the Line App and tap "Stop Ruler"
 - Line positions are saved when closing
 
 ### Tips & Tricks
@@ -134,8 +134,8 @@ To install the app directly on an Android device without using Android Studio:
 ## Permissions
 
 This app requires the following permissions:
-- `SYSTEM_ALERT_WINDOW`: To draw the ruler lines over other apps
-- `FOREGROUND_SERVICE`: To keep the ruler service running reliably
+- `SYSTEM_ALERT_WINDOW`: To draw the lines over other apps
+- `FOREGROUND_SERVICE`: To keep the line service running reliably
 - `FOREGROUND_SERVICE_SPECIAL_USE`: Required for Android 14+ overlay services
 
 The app follows best practices for user privacy and only requests permissions that are essential for its core functionality.
@@ -158,8 +158,8 @@ The app follows best practices for user privacy and only requests permissions th
 ### Common Issues
 1. **Lines not appearing**
    - Ensure you've granted the overlay permission
-   - Check that the ruler service is running (notification should be visible)
-   - Try stopping and starting the ruler from the main app
+   - Check that the line service is running (notification should be visible)
+   - Try stopping and starting the lines from the main app
 
 2. **Can't adjust lines**
    - Line adjustment only works in landscape mode
@@ -173,7 +173,7 @@ The app follows best practices for user privacy and only requests permissions th
 
 4. **Can't interact with apps underneath**
    - This is normal - the overlay allows touch pass-through
-   - You can use other apps while the ruler is visible
+   - You can use other apps while the lines are visible
    - Only the handles and close button capture touches
 
 ## Technical Details
