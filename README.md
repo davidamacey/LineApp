@@ -1,6 +1,6 @@
-# Ruler App
+# Line App
 
-A powerful Android overlay application that displays 7 adjustable ruler lines on top of other apps. Perfect for designers, developers, and anyone who needs to measure and compare on-screen elements. The ruler lines adapt to device orientation and maintain their positions across app sessions.
+A powerful Android overlay application that displays 7 adjustable lines on top of other apps. Perfect for designers, developers, and anyone who needs to align and compare visual elements on-screen. The lines adapt to device orientation and maintain their positions across app sessions.
 
 ## Features
 
@@ -82,7 +82,7 @@ To install the app directly on an Android device without using Android Studio:
    - Follow the prompts to install
    - When installation is complete, tap "Open" to launch the app
 5. **Grant permissions**:
-   - When you first try to use the ruler functionality, you'll be prompted to grant the overlay permission
+   - When you first try to use the line functionality, you'll be prompted to grant the overlay permission
    - Follow the on-screen instructions to enable this permission
 
 ## Usage
@@ -93,13 +93,13 @@ To install the app directly on an Android device without using Android Studio:
    - Read the brief introduction about the app's features
    - Tap "Get Started" to proceed
 
-2. **Starting the Ruler**
+2. **Starting the Lines**
    - Tap the "Start Ruler" button
    - The app will request permission to display over other apps
    - Follow the on-screen instructions to grant the permission
-   - The ruler overlay will appear with 7 colored lines
+   - The line overlay will appear with 7 colored lines
 
-### Using the Ruler
+### Using the Lines
 
 #### Line Orientation
 - **Portrait Mode**: Lines appear vertically (top to bottom)
@@ -114,10 +114,10 @@ To install the app directly on an Android device without using Android Studio:
 - Positions are automatically saved after each adjustment
 
 #### Working with Other Apps
-- The ruler overlay remains visible on top of all apps
-- You can interact with apps underneath the ruler lines
-- Switch between apps normally - the ruler stays in place
-- Perfect for comparing measurements across different apps
+- The line overlay remains visible on top of all apps
+- You can interact with apps underneath the lines
+- Switch between apps normally - the lines stay in place
+- Perfect for comparing alignments across different apps
 
 #### Closing the Lines
 - Tap the × button in the bottom-right corner (visible in any orientation)
@@ -168,7 +168,7 @@ The app follows best practices for user privacy and only requests permissions th
 
 3. **App icon not visible**
    - Check your app drawer (swipe up from home screen)
-   - Try searching for "Ruler App" in your device search
+   - Try searching for "Line App" or "Ruler App" in your device search
    - The icon shows 7 colored horizontal lines
 
 4. **Can't interact with apps underneath**
@@ -189,16 +189,18 @@ The app follows best practices for user privacy and only requests permissions th
 - Target SDK: 33 (Android 13 Tiramisu)
 - Tested on Android 8.0 through Android 14
 
-## Recent Updates
+## Version History
 
-### Version 2.0 (Latest)
-- Fixed orientation handling - lines now display correctly in both portrait and landscape
-- Removed line ordering constraints - lines can now freely cross each other
-- Improved touch handling - users can now interact with apps beneath the overlay
-- Enhanced position persistence - positions save correctly when using the × close button
-- Updated line colors - replaced bright yellow with gold for better visibility
-- Fixed rotation crashes and service lifecycle issues
-- Added proper launcher icon with 7 colored lines design
+### Version 1.0 (Initial Release)
+- 7 adjustable colored lines with numbered handles for easy identification
+- Orientation-aware display - horizontal lines in landscape, vertical in portrait
+- Free line movement - lines can cross each other without constraints
+- Touch pass-through - interact with apps beneath the overlay
+- Persistent line positions - automatically saved and restored between sessions
+- Landscape-only adjustment - drag handles appear only in landscape mode
+- Visual improvements - gold color instead of bright yellow for better visibility
+- Robust service implementation - handles rotation and lifecycle changes properly
+- Launcher icon featuring 7 colored lines design
 
 ## Contributing
 
