@@ -28,7 +28,8 @@
         <service
             android:name=".RulerService"
             android:enabled="true"
-            android:exported="false">
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Overlay ruler for on-screen measurements" />

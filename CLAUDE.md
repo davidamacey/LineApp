@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is an Android application called "Ruler App" that displays 7 adjustable horizontal ruler lines as an overlay on top of other apps. It's built with Kotlin and uses Android's overlay system.
+This is an Android application called "Ruler App" that displays 7 adjustable horizontal ruler lines as an overlay on top of other apps. The lines are always visible in both portrait and landscape orientations, but can only be adjusted in landscape mode. It's built with Kotlin and uses Android's overlay system.
 
 ## Build and Development Commands
 
@@ -49,7 +49,18 @@ The service uses SharedPreferences to persist line positions and app state betwe
 1. **Overlay System**: When modifying overlay behavior, test on different Android versions as overlay APIs have changed
 2. **Service Lifecycle**: The service uses `START_STICKY` to restart if killed - consider this when making changes
 3. **Touch Handling**: The dual-view approach separates interactive elements from visual elements to manage touch events properly
-4. **Screen Bounds**: Line positions are constrained with 40px padding from screen edges
+4. **Screen Bounds**: Line positions are constrained with 40px padding from screen edges  
+5. **Configuration Changes**: Service handles orientation changes via `android:configChanges` in manifest
+6. **Line Constraints**: Lines maintain order (Line N cannot move above Line N-1) with 30px minimum spacing
+7. **Orientation Behavior**: Lines always visible but handles only appear/work in landscape mode
+
+## Recent Critical Fixes Applied
+
+1. **Configuration Change Handling**: Added `android:configChanges="orientation|screenSize|keyboardHidden"` to service in AndroidManifest.xml
+2. **Touch Event Logic**: Fixed drag handling to prevent jumpy behavior during constrained movement
+3. **Close Button Positioning**: Fixed close button to use view dimensions instead of screen dimensions
+4. **View Lifecycle**: Moved close button positioning to onDraw() to ensure proper view measurement
+5. **Orientation Handling**: Lines always visible, handles only in landscape, positions preserved across rotations
 
 ## Testing
 

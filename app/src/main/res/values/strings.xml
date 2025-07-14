@@ -9,7 +9,7 @@
 
     <!-- Instruction Texts -->
     <string name="permission_required_instruction">Overlay permission is needed. Please grant it to use the ruler.</string>
-    <string name="ruler_usage_instruction_7_lines">Drag the 7 orange handles to position the lines. Use \'Close\' in overlay or \'Stop Ruler\' here.</string>
+    <string name="ruler_usage_instruction_7_lines">7 colorful ruler lines are visible in both orientations. Drag the numbered handles in landscape mode to adjust positions. Use \'Close\' in overlay or \'Stop Ruler\' here.</string>
 
     <!-- Dialog Titles and Messages -->
     <string name="dialog_permission_title">Permission Required</string>
@@ -18,22 +18,11 @@
     <string name="dialog_permission_negative_button">Cancel</string>
 
     <string name="dialog_first_time_title">Welcome to Ruler App!</string>
-    <string name="dialog_first_time_message">This app displays 7 vertical ruler lines over other apps.\n\n1. Tap \'Start Ruler\' (or \'Grant Permission\' if needed).\n2. Drag the numbered orange handles at the top to move each line horizontally.\n3. The lines stay visible when you switch to other apps.\n4. Tap the \'Close\' button in the overlay (bottom-right) to hide the lines.\n5. You can also stop the ruler from this app\'s main screen.</string>
+    <string name="dialog_first_time_message">This app displays 7 horizontal ruler lines over other apps in all orientations.\n\n1. Tap \'Start Ruler\' (or \'Grant Permission\' if needed).\n2. The lines are always visible and stay in the same positions when rotating.\n3. In landscape mode: Drag the numbered colored handles to move each line.\n4. In portrait mode: Lines are visible but not adjustable.\n5. The lines stay visible when you switch to other apps.\n6. Tap the \'×\' button in the overlay (bottom-right) to hide the lines.</string>
     <string name="dialog_first_time_positive_button">Got it!</string>
 
     <string name="dialog_permission_denied_title">Permission Still Required</string>
     <string name="dialog_permission_denied_message">The ruler cannot function without the overlay permission. Please grant the permission if you wish to use the ruler.</string>
     <string name="dialog_permission_denied_positive_button">Try Again</string>
 
-    <!-- Unused but kept for now -->
-    <string name="line_1">Line 1</string>
-    <string name="line_2">Line 2</string>
-    <string name="line_3">Line 3</string>
-    <string name="line_4">Line 4</string>
-    <string name="line_5">Line 5</string>
-    <string name="line_6">Line 6</string>
-    <string name="line_7">Line 7</string>
-
-    <!-- Temporary fix for build error -->
-    <string name="stop_service">Stop Ruler</string>
 </resources>

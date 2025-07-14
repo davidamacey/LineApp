@@ -19,8 +19,8 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val OVERLAY_PERMISSION_REQUEST_CODE = 1234
         private const val TAG = "MainActivity"
-        private const val APP_PREFS_NAME = "app_prefs" // Shared preferences file name
-        private const val SERVICE_RUNNING_KEY = "service_running_status" // Key for service status
+        private const val PREFS_NAME = "RulerPreferences"
+        private const val SERVICE_RUNNING_KEY = "service_running_status"
     }
 
     private lateinit var startRulerButton: Button
@@ -37,9 +37,7 @@ class MainActivity : AppCompatActivity() {
             startRulerButton = findViewById(R.id.startRulerButton)
             stopRulerButton = findViewById(R.id.stopRulerButton)
             instructionsTextView = findViewById(R.id.instructionsTextView)
-            appPrefs = getSharedPreferences(APP_PREFS_NAME, MODE_PRIVATE)
-
-            // updateUiStates() will be called in onResume, which is always called after onCreate
+            appPrefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
 
             startRulerButton.setOnClickListener {
                 if (checkOverlayPermission()) {
@@ -89,7 +87,6 @@ class MainActivity : AppCompatActivity() {
                     Uri.parse("package:$packageName")
                 )
                 startActivityForResult(intent, OVERLAY_PERMISSION_REQUEST_CODE)
-                // Toast moved to onActivityResult or handled by system
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error requesting overlay permission", e)
@@ -100,8 +97,6 @@ class MainActivity : AppCompatActivity() {
     private fun updateUiStates() {
         val hasPermission = checkOverlayPermission()
         val isServiceExpectedToRun = appPrefs.getBoolean(SERVICE_RUNNING_KEY, false)
-
-        Log.d(TAG, "updateUiStates: hasPermission=$hasPermission, isServiceExpectedToRun=$isServiceExpectedToRun")
 
         if (!hasPermission) {
             instructionsTextView.text = getString(R.string.permission_required_instruction)
@@ -115,7 +110,6 @@ class MainActivity : AppCompatActivity() {
                 startRulerButton.visibility = View.GONE
                 stopRulerButton.visibility = View.VISIBLE
                 stopRulerButton.isEnabled = true
-                // stopRulerButton.text = getString(R.string.stop_service_button) // Optional: if you want to set text
             } else {
                 startRulerButton.text = getString(R.string.start_service_button) // "Start Ruler"
                 startRulerButton.isEnabled = true
@@ -197,8 +191,7 @@ class MainActivity : AppCompatActivity() {
                 appPrefs.edit().putBoolean(SERVICE_RUNNING_KEY, false).apply()
                 updateUiStates()
                 Toast.makeText(this, "Permission denied. Ruler cannot function.", Toast.LENGTH_LONG).show()
-                // Optionally, show a more persistent dialog explaining the consequences
-                 AlertDialog.Builder(this)
+                AlertDialog.Builder(this)
                     .setTitle(getString(R.string.dialog_permission_denied_title))
                     .setMessage(getString(R.string.dialog_permission_denied_message))
                     .setPositiveButton(getString(R.string.dialog_permission_denied_positive_button)) { _, _ -> requestOverlayPermission() }
@@ -207,12 +200,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    
+    // Removed - no longer clearing saved positions
 }
-
-// Note: Ensure you have the following string resources in your strings.xml:
-// <string name="permission_required_instruction">Permission required: This app needs permission to display over other apps.</string>
-// <string name="grant_permission_button">Grant Permission</string>
-// <string name="ruler_usage_instruction_7_lines">This app displays 7 adjustable vertical ruler lines. Use the orange handles to drag them. Close via the overlay\'s \'Close\' button or here.</string>
-// <string name="start_service_button">Start Ruler</string>
-// <string name="stop_service_button">Stop Ruler</string> // Optional, if you set text on stop button
-// <string name="overlay_permission_required">Overlay permission is required to display the ruler. Please enable it in settings.</string> // Already used

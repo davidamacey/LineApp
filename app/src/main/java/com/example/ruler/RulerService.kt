@@ -23,7 +23,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import kotlin.math.min
 
 class RulerService : Service() {
 
@@ -32,13 +31,27 @@ class RulerService : Service() {
         private const val NOTIFICATION_CHANNEL_ID = "RulerServiceChannel"
         private const val TAG = "RulerService"
         private const val PREFS_NAME = "RulerPreferences"
-        private const val LINE_POSITION_PREFIX = "line_position_" // More generic name for storing positions
+        private const val LINE_POSITION_PREFIX = "line_position_"
         private const val NUM_LINES = 7
         private const val HANDLE_WIDTH = 60
         private const val HANDLE_HEIGHT = 40
-        private const val LINE_WIDTH = 2
+        private const val LINE_WIDTH = 3
         private const val CLOSE_BUTTON_SIZE = 80
-        var isServiceRunning = false // Flag to indicate service status
+        private const val MIN_LINE_SPACING = 30
+        private const val SCREEN_PADDING = 40f
+        private const val CLOSE_BUTTON_MARGIN = 20
+        
+        var isServiceRunning = false
+        
+        private val LINE_COLORS = intArrayOf(
+            Color.RED,
+            0xFFFFA500.toInt(), // Orange
+            0xFFFFD700.toInt(), // Gold (less bright than yellow)
+            Color.GREEN,
+            0xFF00BFFF.toInt(), // Deep Sky Blue
+            0xFF8A2BE2.toInt(), // Blue Violet
+            Color.MAGENTA
+        )
     }
 
     private lateinit var windowManager: WindowManager
@@ -49,26 +62,27 @@ class RulerService : Service() {
     private var screenHeight: Int = 0
     private var linePositions = FloatArray(NUM_LINES) // Y positions of the lines (vertical position on screen)
     private var isLandscape = false
-    private var naturalWidth: Int = 0 // Natural width (shorter dimension)
-    private var naturalHeight: Int = 0 // Natural height (longer dimension)
     private var currentOrientation: Int = Configuration.ORIENTATION_UNDEFINED
     
     // Non-interactive view that just draws the ruler lines
     private inner class RulerLinesView(context: Context) : View(context) {
-        private val linePaint = Paint().apply { 
-            color = Color.rgb(255, 165, 0) // Orange
+        private val linePaint = Paint().apply {
             strokeWidth = LINE_WIDTH.toFloat()
+            isAntiAlias = true
         }
         
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
             
-            // Draw horizontal ruler lines
             for (i in 0 until NUM_LINES) {
-                val position = linePositions[i]
-                
-                // Draw horizontal lines (from left to right across the screen)
-                canvas.drawLine(0f, position, width.toFloat(), position, linePaint)
+                linePaint.color = LINE_COLORS[i]
+                if (isLandscape) {
+                    // Landscape: horizontal lines (left to right)
+                    canvas.drawLine(0f, linePositions[i], width.toFloat(), linePositions[i], linePaint)
+                } else {
+                    // Portrait: vertical lines (top to bottom)  
+                    canvas.drawLine(linePositions[i], 0f, linePositions[i], height.toFloat(), linePaint)
+                }
             }
         }
     }
@@ -76,72 +90,113 @@ class RulerService : Service() {
     // Interactive view for handles and close button
     private inner class RulerControlsView(context: Context) : View(context) {
         private val handlePaint = Paint().apply {
-            color = Color.rgb(255, 165, 0) // Orange
             style = Paint.Style.FILL
+            isAntiAlias = true
+        }
+        
+        private val handleStrokePaint = Paint().apply {
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            strokeWidth = 2f
+            isAntiAlias = true
         }
         
         private val textPaint = Paint().apply {
             color = Color.WHITE
             textSize = 16 * resources.displayMetrics.density
             textAlign = Paint.Align.CENTER
+            isAntiAlias = true
         }
         
         private val closePaint = Paint().apply {
             color = Color.DKGRAY
             style = Paint.Style.FILL
+            isAntiAlias = true
         }
         
         private val closeTextPaint = Paint().apply {
             color = Color.WHITE
             textSize = 14 * resources.displayMetrics.density
             textAlign = Paint.Align.CENTER
+            isAntiAlias = true
         }
         
-        private lateinit var closeButtonRect: Rect
-        private val handleRects = Array(NUM_LINES) { Rect() } // Array of handle rectangles for hit detection
+        private var closeButtonRect = Rect() // Initialize here directly
+        private val leftHandleRects = Array(NUM_LINES) { Rect() } // Left handle rectangles
+        private val rightHandleRects = Array(NUM_LINES) { Rect() } // Right handle rectangles
         
         private var activeHandleIndex = -1
         private var initialTouchPos = 0f // Stores Y position for vertical movement
         private var isMovingHandle = false
+        private var isLeftHandle = true // Track which handle is being dragged
         
-        init {
-            updateCloseButtonPosition()
-        }
-        
-        fun updateCloseButtonPosition() {
-            // Position close button in the bottom right corner
-            val margin = 20
-            closeButtonRect = Rect(
-                screenWidth - CLOSE_BUTTON_SIZE - margin,
-                screenHeight - CLOSE_BUTTON_SIZE - margin,
-                screenWidth - margin,
-                screenHeight - margin
+        private fun updateCloseButtonPosition() {
+            closeButtonRect.set(
+                width - CLOSE_BUTTON_SIZE - CLOSE_BUTTON_MARGIN,
+                height - CLOSE_BUTTON_SIZE - CLOSE_BUTTON_MARGIN,
+                width - CLOSE_BUTTON_MARGIN,
+                height - CLOSE_BUTTON_MARGIN
             )
         }
         
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
             
-            // Draw handles for dragging
-            for (i in 0 until NUM_LINES) {
-                val position = linePositions[i]
-                
-                // Calculate handle position for horizontal line
-                val handleLeft = 0
-                val handleTop = position.toInt() - HANDLE_HEIGHT / 2
-                val handleRight = HANDLE_WIDTH
-                val handleBottom = handleTop + HANDLE_HEIGHT
-                
-                // Store handle rect for hit testing
-                handleRects[i].set(handleLeft, handleTop, handleRight, handleBottom)
-                
-                // Draw handle with number
-                canvas.drawRect(handleRects[i], handlePaint)
-                canvas.drawText((i + 1).toString(), handleLeft + HANDLE_WIDTH / 2f, 
-                               handleTop + HANDLE_HEIGHT / 2f + textPaint.textSize / 3, textPaint)
+            // Update close button position based on current view size
+            updateCloseButtonPosition()
+            
+            // Only draw handles in landscape mode (for dragging)
+            if (isLandscape) {
+                // Draw handles for dragging (both left and right sides)
+                for (i in 0 until NUM_LINES) {
+                    val position = linePositions[i]
+                    
+                    // Left handle
+                    val leftHandleLeft = 0
+                    val leftHandleTop = position.toInt() - HANDLE_HEIGHT / 2
+                    val leftHandleRight = HANDLE_WIDTH
+                    val leftHandleBottom = leftHandleTop + HANDLE_HEIGHT
+                    
+                    leftHandleRects[i].set(leftHandleLeft, leftHandleTop, leftHandleRight, leftHandleBottom)
+                    
+                    // Right handle
+                    val rightHandleLeft = width - HANDLE_WIDTH
+                    val rightHandleTop = position.toInt() - HANDLE_HEIGHT / 2
+                    val rightHandleRight = width
+                    val rightHandleBottom = rightHandleTop + HANDLE_HEIGHT
+                    
+                    rightHandleRects[i].set(rightHandleLeft, rightHandleTop, rightHandleRight, rightHandleBottom)
+                    
+                    // Draw left handle with rounded corners
+                    handlePaint.color = LINE_COLORS[i]
+                    val leftRect = leftHandleRects[i]
+                    canvas.drawRoundRect(leftRect.left.toFloat(), leftRect.top.toFloat(),
+                                       leftRect.right.toFloat(), leftRect.bottom.toFloat(),
+                                       8f, 8f, handlePaint)
+                    canvas.drawRoundRect(leftRect.left.toFloat(), leftRect.top.toFloat(),
+                                       leftRect.right.toFloat(), leftRect.bottom.toFloat(),
+                                       8f, 8f, handleStrokePaint)
+                    
+                    // Draw right handle with rounded corners
+                    val rightRect = rightHandleRects[i]
+                    canvas.drawRoundRect(rightRect.left.toFloat(), rightRect.top.toFloat(),
+                                       rightRect.right.toFloat(), rightRect.bottom.toFloat(),
+                                       8f, 8f, handlePaint)
+                    canvas.drawRoundRect(rightRect.left.toFloat(), rightRect.top.toFloat(),
+                                       rightRect.right.toFloat(), rightRect.bottom.toFloat(),
+                                       8f, 8f, handleStrokePaint)
+                    
+                    // Draw line numbers on both handles
+                    canvas.drawText((i + 1).toString(), 
+                                   leftHandleLeft + HANDLE_WIDTH / 2f, 
+                                   leftHandleTop + HANDLE_HEIGHT / 2f + textPaint.textSize / 3, textPaint)
+                    canvas.drawText((i + 1).toString(), 
+                                   rightHandleLeft + HANDLE_WIDTH / 2f, 
+                                   rightHandleTop + HANDLE_HEIGHT / 2f + textPaint.textSize / 3, textPaint)
+                }
             }
             
-            // Draw close button (always in top-right corner)
+            // Draw close button (always in bottom-right corner)
             canvas.drawOval(closeButtonRect.left.toFloat(), closeButtonRect.top.toFloat(), 
                            closeButtonRect.right.toFloat(), closeButtonRect.bottom.toFloat(), closePaint)
             canvas.drawText("×", closeButtonRect.exactCenterX(), 
@@ -154,44 +209,57 @@ class RulerService : Service() {
             
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    // Check if close button was tapped
+                    // Check if close button was tapped (always works, any orientation)
                     if (closeButtonRect.contains(x.toInt(), y.toInt())) {
+                        // Save positions before stopping service
+                        saveLinePositions()
                         // Close button tapped - stop service
                         stopSelf()
                         return true
                     }
                     
-                    // Check if any handle was tapped
+                    // Only allow handle dragging in landscape mode
+                    if (!isLandscape) return false // Let touch pass through
+                    
+                    // Check if any left handle was tapped
                     for (i in 0 until NUM_LINES) {
-                        if (handleRects[i].contains(x.toInt(), y.toInt())) {
+                        if (leftHandleRects[i].contains(x.toInt(), y.toInt())) {
                             activeHandleIndex = i
                             initialTouchPos = y
                             isMovingHandle = true
+                            isLeftHandle = true
                             return true
                         }
                     }
+                    
+                    // Check if any right handle was tapped
+                    for (i in 0 until NUM_LINES) {
+                        if (rightHandleRects[i].contains(x.toInt(), y.toInt())) {
+                            activeHandleIndex = i
+                            initialTouchPos = y
+                            isMovingHandle = true
+                            isLeftHandle = false
+                            return true
+                        }
+                    }
+                    
+                    // If no UI element was touched, let the touch pass through
+                    return false
                 }
                 
                 MotionEvent.ACTION_MOVE -> {
                     if (isMovingHandle && activeHandleIndex != -1) {
                         // Calculate new line position
                         val deltaY = y - initialTouchPos
-                        
-                        // Update line position (but keep it within screen bounds)
                         var newPosition = linePositions[activeHandleIndex] + deltaY
+                        newPosition = newPosition.coerceIn(SCREEN_PADDING, height.toFloat() - SCREEN_PADDING)
+                        // Allow lines to cross each other - no ordering constraints
                         
-                        // Constrain to screen bounds with padding
-                        newPosition = newPosition.coerceIn(40f, height.toFloat() - 40f)
+                        linePositions[activeHandleIndex] = newPosition
+                        initialTouchPos = y
                         
-                        // Only update if position changed
-                        if (newPosition != linePositions[activeHandleIndex]) {
-                            linePositions[activeHandleIndex] = newPosition
-                            initialTouchPos = y
-                            
-                            // Redraw both views
-                            invalidate()
-                            rulerLinesView.invalidate()
-                        }
+                        invalidate()
+                        rulerLinesView.invalidate()
                         
                         return true
                     }
@@ -208,14 +276,20 @@ class RulerService : Service() {
                 }
             }
             
-            return super.onTouchEvent(event)
+            return false // Let unhandled touches pass through
         }
+        
+        // Lines can now freely cross each other - no ordering constraints
     }
 
     override fun onCreate() {
         super.onCreate()
         Log.d(TAG, "Creating ruler service")
         try {
+            // Create notification and start foreground immediately
+            setupNotificationChannel()
+            startForeground(NOTIFICATION_ID, createNotification())
+            
             // Mark service as running
             isServiceRunning = true
             
@@ -224,8 +298,9 @@ class RulerService : Service() {
             val metrics = DisplayMetrics()
             
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val display = display ?: windowManager.defaultDisplay
-                display.getRealMetrics(metrics)
+                val bounds = windowManager.currentWindowMetrics.bounds
+                metrics.widthPixels = bounds.width()
+                metrics.heightPixels = bounds.height()
             } else {
                 @Suppress("DEPRECATION")
                 windowManager.defaultDisplay.getRealMetrics(metrics)
@@ -241,10 +316,6 @@ class RulerService : Service() {
             
             Log.d(TAG, "Screen dimensions: $screenWidth x $screenHeight, isLandscape: $isLandscape")
             
-            // Always use natural dimensions for consistent positioning
-            naturalWidth = min(screenWidth, screenHeight)
-            naturalHeight = max(screenWidth, screenHeight)
-            
             // Get shared preferences for storing ruler positions
             sharedPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             
@@ -253,10 +324,6 @@ class RulerService : Service() {
             
             // Restore line positions (or use defaults)
             restoreLinePositions()
-            
-            // Create a notification for foreground service
-            setupNotificationChannel()
-            startForeground(NOTIFICATION_ID, createNotification())
             
             Log.d(TAG, "Ruler service created successfully")
         } catch (e: Exception) {
@@ -301,28 +368,30 @@ class RulerService : Service() {
             // Create and add interactive controls view
             controlsView = RulerControlsView(this)
             
-            // Create layout parameters for controls
+            // Create layout parameters for controls - make it not block touches
             val controlsParams = WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT,
+                if (isLandscape) WindowManager.LayoutParams.MATCH_PARENT else CLOSE_BUTTON_SIZE + CLOSE_BUTTON_MARGIN * 2,
+                if (isLandscape) WindowManager.LayoutParams.MATCH_PARENT else CLOSE_BUTTON_SIZE + CLOSE_BUTTON_MARGIN * 2,
                 overlayType,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or // Non-focusable but touchable
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
                 PixelFormat.TRANSLUCENT
             )
             
-            // Position the controls at 0,0
-            controlsParams.gravity = Gravity.TOP or Gravity.START
+            // Position based on orientation
+            controlsParams.gravity = if (isLandscape) {
+                Gravity.TOP or Gravity.START
+            } else {
+                Gravity.BOTTOM or Gravity.END  // Just close button in portrait
+            }
             
             // Add controls view to window manager
             windowManager.addView(controlsView, controlsParams)
             Log.d(TAG, "Added controls view")
             
-            // Initialize close button position in controls view
-            controlsView.updateCloseButtonPosition()
-            
-            // Force an initial update to both views
+            // Trigger initial draw
             rulerLinesView.invalidate()
             controlsView.invalidate()
             
@@ -352,27 +421,47 @@ class RulerService : Service() {
 
     private fun restoreLinePositions() {
         try {
-            Log.d(TAG, "Restoring line positions. Screen height: $screenHeight")
+            Log.d(TAG, "Restoring line positions. Screen width: $screenWidth, height: $screenHeight")
 
             for (i in 0 until NUM_LINES) {
-                // Default to evenly spaced positions
-                val defaultPosition = if (screenHeight > 0) {
-                    (screenHeight.toFloat() / (NUM_LINES + 1)) * (i + 1)
+                // Default positions depend on orientation
+                val defaultPosition = if (isLandscape) {
+                    // Landscape: evenly space across height
+                    if (screenHeight > 0) {
+                        SCREEN_PADDING + ((screenHeight - 2 * SCREEN_PADDING) / (NUM_LINES + 1)) * (i + 1)
+                    } else {
+                        100f + (i * 50f)
+                    }
                 } else {
-                    100f + (i * 100f) // Fallback if screenHeight isn't available yet
+                    // Portrait: evenly space across width
+                    if (screenWidth > 0) {
+                        SCREEN_PADDING + ((screenWidth - 2 * SCREEN_PADDING) / (NUM_LINES + 1)) * (i + 1)
+                    } else {
+                        100f + (i * 50f)
+                    }
                 }
 
                 // Restore from preferences or use default
-                linePositions[i] = sharedPreferences.getFloat(LINE_POSITION_PREFIX + i, defaultPosition)
+                val savedPosition = sharedPreferences.getFloat(LINE_POSITION_PREFIX + i, defaultPosition)
                 
-                Log.d(TAG, "Restored position for line $i: ${linePositions[i]} (default: $defaultPosition)")
+                // Ensure saved position is within bounds
+                val maxDimension = if (isLandscape) screenHeight.toFloat() else screenWidth.toFloat()
+                linePositions[i] = savedPosition.coerceIn(SCREEN_PADDING, maxDimension - SCREEN_PADDING)
+                
+                // If saved position is way out of bounds, use default
+                if (savedPosition > maxDimension || savedPosition < 0) {
+                    linePositions[i] = defaultPosition
+                }
+                
+                Log.d(TAG, "Line $i position: ${linePositions[i]} (default: $defaultPosition, saved: $savedPosition)")
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error restoring line positions, using defaults", e)
             
-            // If restoration fails, set default positions - evenly spaced vertically
+            // If restoration fails, set default positions
+            val dimension = if (isLandscape) screenHeight.toFloat() else screenWidth.toFloat()
             for (i in 0 until NUM_LINES) {
-                linePositions[i] = (screenHeight.toFloat() / (NUM_LINES + 1)) * (i + 1)
+                linePositions[i] = SCREEN_PADDING + ((dimension - 2 * SCREEN_PADDING) / (NUM_LINES + 1)) * (i + 1)
             }
         }
     }
@@ -408,14 +497,80 @@ class RulerService : Service() {
         Log.d(TAG, "Ruler service started")
         return START_STICKY // If the service is killed, restart it
     }
+    
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        Log.d(TAG, "Configuration changed: orientation = ${newConfig.orientation}")
+        
+        val newOrientation = newConfig.orientation
+        if (newOrientation != currentOrientation) {
+            currentOrientation = newOrientation
+            isLandscape = currentOrientation == Configuration.ORIENTATION_LANDSCAPE
+            
+            // Update screen dimensions
+            val metrics = DisplayMetrics()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val bounds = windowManager.currentWindowMetrics.bounds
+                metrics.widthPixels = bounds.width()
+                metrics.heightPixels = bounds.height()
+            } else {
+                @Suppress("DEPRECATION")
+                windowManager.defaultDisplay.getRealMetrics(metrics)
+            }
+            
+            screenWidth = metrics.widthPixels
+            screenHeight = metrics.heightPixels
+            
+            Log.d(TAG, "New screen dimensions: $screenWidth x $screenHeight, isLandscape: $isLandscape")
+            
+            // Restore positions when orientation changes
+            restoreLinePositions()
+            
+            // Force redraw and re-layout
+            if (::rulerLinesView.isInitialized) {
+                rulerLinesView.invalidate()
+            }
+            if (::controlsView.isInitialized) {
+                // Re-create layout params for new orientation
+                val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                } else {
+                    WindowManager.LayoutParams.TYPE_SYSTEM_ALERT
+                }
+                
+                val controlsParams = WindowManager.LayoutParams(
+                    if (isLandscape) WindowManager.LayoutParams.MATCH_PARENT else CLOSE_BUTTON_SIZE + CLOSE_BUTTON_MARGIN * 2,
+                    if (isLandscape) WindowManager.LayoutParams.MATCH_PARENT else CLOSE_BUTTON_SIZE + CLOSE_BUTTON_MARGIN * 2,
+                    overlayType,
+                    WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    PixelFormat.TRANSLUCENT
+                )
+                
+                controlsParams.gravity = if (isLandscape) {
+                    Gravity.TOP or Gravity.START
+                } else {
+                    Gravity.BOTTOM or Gravity.END
+                }
+                
+                // Update the window params
+                windowManager.updateViewLayout(controlsView, controlsParams)
+                controlsView.invalidate()
+            }
+        }
+    }
 
     override fun onDestroy() {
         try {
             Log.d(TAG, "Destroying ruler service")
             isServiceRunning = false // Set flag to false
             
-            // Save positions before shutting down
-            saveLinePositions()
+            // Save positions before shutting down (only if initialized)
+            if (::sharedPreferences.isInitialized) {
+                saveLinePositions()
+            }
             
             // Remove both overlay views
             if (::windowManager.isInitialized) {

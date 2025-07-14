@@ -1,17 +1,22 @@
 # Ruler App
 
-A powerful Android application that displays 7 adjustable ruler lines that stay on top of other apps. Perfect for designers, developers, and anyone who needs precise screen measurements. The app is optimized for landscape mode and remembers your line positions between sessions.
+A powerful Android overlay application that displays 7 adjustable ruler lines on top of other apps. Perfect for designers, developers, and anyone who needs to measure and compare on-screen elements. The ruler lines adapt to device orientation and maintain their positions across app sessions.
 
 ## Features
 
-- **7 Adjustable Lines**: Horizontal lines, each with a distinct color for easy identification
-- **Persistent State**: Line positions are automatically saved and restored between app sessions
-- **Overlay Functionality**: Lines stay on top of all other apps
-- **Intuitive Controls**: Drag handles make line adjustment simple and precise
+- **7 Adjustable Lines**: Each line has a distinct color and number for easy identification
+- **Orientation Aware**: 
+  - Landscape mode: Horizontal lines with draggable handles on both sides
+  - Portrait mode: Vertical lines (view-only, adjust in landscape)
+- **Free Movement**: Lines can cross each other - no ordering constraints
+- **Persistent State**: Line positions are automatically saved and restored between sessions
+- **True Overlay**: Lines stay visible while you interact with other apps underneath
+- **Intuitive Controls**: 
+  - Numbered handles on both left and right sides in landscape mode
+  - Close button (×) always visible in bottom-right corner
 - **First-Run Guidance**: Helpful instructions for first-time users
-- **Robust Error Handling**: Clear error messages and recovery options
-- **Landscape Optimized**: Perfect for wide-screen measurements
-- **Minimal Battery Impact**: Efficient implementation with low resource usage
+- **Robust Error Handling**: Automatic recovery from orientation changes and service restarts
+- **Minimal Battery Impact**: Efficient foreground service implementation
 
 ## Requirements
 
@@ -38,6 +43,7 @@ A powerful Android application that displays 7 adjustable ruler lines that stay 
    - Landscape orientation
 2. Start the emulator and install the app
 3. Run the app and grant the overlay permission when prompted
+4. Note: The app icon should appear in your app drawer after installation
 
 ### Using a Physical Device (Development)
 
@@ -91,45 +97,56 @@ To install the app directly on an Android device without using Android Studio:
    - Tap the "Start Ruler" button
    - The app will request permission to display over other apps
    - Follow the on-screen instructions to grant the permission
-   - The ruler overlay will appear with 7 horizontal lines
+   - The ruler overlay will appear with 7 colored lines
 
 ### Using the Ruler
-- **Adjusting Lines**
-  - Each line has a circular handle on the right side
-  - Touch and hold a handle, then drag up or down to adjust the line's position
-  - Release to set the line in its new position
-  - The position is automatically saved
 
-- **Working with Other Apps**
-  - The ruler stays on top of other apps
-  - Switch to any app and the ruler will remain visible
-  - Tap the floating control button to show/hide the ruler handles
+#### Line Orientation
+- **Portrait Mode**: Lines appear vertically (top to bottom)
+- **Landscape Mode**: Lines appear horizontally (left to right)
+- Lines maintain their relative positions when rotating the device
 
-- **Stopping the Ruler**
-  - Return to the Ruler app
-  - Tap "Stop Ruler" to remove the overlay
-  - Or use the floating control button and tap "Close"
+#### Adjusting Lines (Landscape Mode Only)
+- Each line has numbered handles on both left and right sides
+- The number and color help identify each line (1-7)
+- Touch and drag any handle to move that line
+- Lines can freely cross over each other
+- Positions are automatically saved after each adjustment
+
+#### Working with Other Apps
+- The ruler overlay remains visible on top of all apps
+- You can interact with apps underneath the ruler lines
+- Switch between apps normally - the ruler stays in place
+- Perfect for comparing measurements across different apps
+
+#### Closing the Ruler
+- Tap the × button in the bottom-right corner (visible in any orientation)
+- Or return to the Ruler app and tap "Stop Ruler"
+- Line positions are saved when closing
 
 ### Tips & Tricks
-- Double-tap a line's handle to quickly reset it to its default position
-- The app remembers your line positions between sessions
-- For precise adjustments, use two fingers to "zoom in" on the ruler area
-- The app is optimized for landscape mode - rotate your device for the best experience
+- Rotate to landscape mode to adjust line positions
+- Each line's number stays constant even when lines cross
+- Line colors: Red (1), Orange (2), Gold (3), Green (4), Sky Blue (5), Violet (6), Magenta (7)
+- The app automatically saves positions when you close it with the × button
+- Lines are constrained to stay within screen boundaries with padding
 
 ## Permissions
 
 This app requires the following permissions:
 - `SYSTEM_ALERT_WINDOW`: To draw the ruler lines over other apps
-- `INTERNET` (optional): For crash reporting and analytics (if implemented in future versions)
+- `FOREGROUND_SERVICE`: To keep the ruler service running reliably
+- `FOREGROUND_SERVICE_SPECIAL_USE`: Required for Android 14+ overlay services
 
 The app follows best practices for user privacy and only requests permissions that are essential for its core functionality.
 
 ## Advanced Features
 
-### Persistent Line Positions
-- Line positions are automatically saved when adjusted
-- Positions are restored when you restart the app
-- Reset all lines to default positions from the app settings
+### Line Management
+- Line positions are saved in real-time as you adjust them
+- Positions persist across app restarts and device reboots
+- Lines can be freely arranged - they can overlap or cross each other
+- Each line maintains its identity (number and color) regardless of position
 
 ### Error Recovery
 - Clear error messages help you understand and resolve issues
@@ -140,16 +157,48 @@ The app follows best practices for user privacy and only requests permissions th
 
 ### Common Issues
 1. **Lines not appearing**
-   - Make sure you've granted the overlay permission
-   - Restart the app if you just granted the permission
+   - Ensure you've granted the overlay permission
+   - Check that the ruler service is running (notification should be visible)
+   - Try stopping and starting the ruler from the main app
 
-2. **Lines not saving positions**
-   - Check if storage permission is granted
-   - Try restarting the app
+2. **Can't adjust lines**
+   - Line adjustment only works in landscape mode
+   - Rotate your device to landscape orientation
+   - Look for the numbered handles on both sides of the screen
 
-3. **App crashes or behaves unexpectedly**
-   - Clear app data from device settings
-   - Reinstall the app if issues persist
+3. **App icon not visible**
+   - Check your app drawer (swipe up from home screen)
+   - Try searching for "Ruler App" in your device search
+   - The icon shows 7 colored horizontal lines
+
+4. **Can't interact with apps underneath**
+   - This is normal - the overlay allows touch pass-through
+   - You can use other apps while the ruler is visible
+   - Only the handles and close button capture touches
+
+## Technical Details
+
+### Architecture
+- **Service-based**: Uses a foreground service for reliable overlay display
+- **Dual-view system**: Separate views for lines (non-interactive) and controls (interactive)
+- **Orientation handling**: Proper configuration change management
+- **State persistence**: SharedPreferences for storing line positions
+
+### Compatibility
+- Minimum SDK: 26 (Android 8.0 Oreo)
+- Target SDK: 33 (Android 13 Tiramisu)
+- Tested on Android 8.0 through Android 14
+
+## Recent Updates
+
+### Version 2.0 (Latest)
+- Fixed orientation handling - lines now display correctly in both portrait and landscape
+- Removed line ordering constraints - lines can now freely cross each other
+- Improved touch handling - users can now interact with apps beneath the overlay
+- Enhanced position persistence - positions save correctly when using the × close button
+- Updated line colors - replaced bright yellow with gold for better visibility
+- Fixed rotation crashes and service lifecycle issues
+- Added proper launcher icon with 7 colored lines design
 
 ## Contributing
 
